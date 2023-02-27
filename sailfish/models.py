@@ -722,18 +722,18 @@ class KelvinHelmholtz:
         cs_mid = sqrt(self.gamma * 1.0 / 1.5)
 
         # x-velocity
-        p[top, 1] = -self.mach_number * cs_top_bot + 0.01 * random.uniform(
+        p[top, 1] = -self.mach_number * cs_top_bot + 1e-10 * random.uniform(
             -1, 1, len(p[top, 0])
         )
-        p[mid, 1] = +self.mach_number * cs_mid + 0.01 * random.uniform(
+        p[mid, 1] = +self.mach_number * cs_mid + 1e-10 * random.uniform(
             -1, 1, len(p[mid, 0])
         )
-        p[bot, 1] = -self.mach_number * cs_top_bot + 0.01 * random.uniform(
+        p[bot, 1] = -self.mach_number * cs_top_bot + 1e-10 * random.uniform(
             -1, 1, len(p[bot, 0])
         )
 
         # y-velocity
-        p[..., 2] = 0.0 + 0.01 * random.uniform(-1, 1, len(p[..., 0]))
+        p[..., 2] = 0.0 + 1e-10 * random.uniform(-1, 1, len(p[..., 0]))
 
         # pressure
         p[..., 3] = 1.0
