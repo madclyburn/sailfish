@@ -23,11 +23,11 @@ for i in it_range:
     job_dict = {
         "initial_data.model": "kelvin-helmholtz",
         "initial_data.mach_number": round(i, 2),
-        "domain.num_zones": [1024, 1024, 1],
+        "domain.num_zones": [256, 256, 1],
         "domain.extent_i": [-0.5, 0.5],
         "domain.extent_j": [-0.5, 0.5],
         "driver.tfinal": 5.0,
-        "driver.checkpoint.cadence": 0.1,
+        "driver.checkpoint.cadence": 0.01,
         "driver.report.cadence": 50,
         "scheme.reconstruction": ["plm", 1.5],
         "scheme.time_integration": "rk3",
@@ -48,8 +48,7 @@ for j in it_range:
         json.dump(list_of_dicts[i], indent=4, fp=outfile)
     i += 1
 
-
-path = "/Users/clyburn/Work/Codes/sailfish_v06beta/sailfish*.pk"
+path = "/Users/clyburn/Work/Codes/sailfish_v06beta/sailfish/*.pk"
 inst = dict()
 for k in it_range:
     system('./bin/sailfish run ' + str(round(k, 2)) + '.json')
@@ -65,10 +64,29 @@ for k in it_range:
             data_arr[1].append(avg_vy)
             inst[str(round(k, 2))] = data_arr
         
-
 with open('instability.pk', 'wb') as pkfile:
     pickle.dump(inst, pkfile)
 
-
-
+"""
+with open('instability.pk', 'rb') as pkfile:
+    list_of_vel = load(pkfile)
+for m in it_range:
+    m_data = list_of_vel[m]
+    vy2 = []
+    time = []
+    for i in range(50):
+        vy2.append(np.log(m_data[i][1]))
+        time.append(m_data[i][0])
+    j=1
+    while True:
+        if vy2[-1] - vy2[-1-j] > 10:
+            if vy2[j+1] - vy2[j] > 10:
+                slope = (vy2[-1-j]-vy2[j+1])/(time[-1-j]-time[j+1])
+                break
+            else:
+                break
+        else:
+            j+=1
+    print(slope)
+    """
 
