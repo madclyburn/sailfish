@@ -3,3 +3,4 @@ __pycache__
 /data
 /legacy/doc/source/_autosummary
 /legacy/doc/build
+/python_env
