@@ -1,7 +1,8 @@
 import argparse as argp
 import json
 import numpy as np
-from subprocess import Popen
+from os import system
+from matplotlib import pyplot as plt
 from pickle import load
 
 
@@ -65,7 +66,7 @@ for j in it_range:
 
 inst = []
 for k in it_range:
-    Popen('./bin/sailfish run ' + str(round(k, 2)) + '.json',
+    system('./bin/sailfish run ' + str(round(k, 2)) + '.json',
                  shell=True)
     for item in checkpoint_reader():
         vy = item["primitive"][:,2]
@@ -73,9 +74,7 @@ for k in it_range:
         vy2 = np.square(np.abs(v))
         avg_vy = np.average(vy2)
         inst.append(avg_vy)
-    plt.scatter(t, inst)
-
-plot.show()
+    print(avg_vy)
 
 
 
