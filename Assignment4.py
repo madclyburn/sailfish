@@ -1,27 +1,11 @@
 import argparse as argp
 import json
 import numpy as np
+import glob
 from os import system
 from matplotlib import pyplot as plt
 from pickle import load
 
-
-def checkpoint_reader():
-    """
-    This function returns a list of dictionaries from the read checkpoints.
-    :return: [{}, {}, ...]
-    """
-    parser = argparse.ArgumentParser()
-    parser.add_argument("filenames", nargs="+")
-    args = parser.parse_args()
-
-    raw_data = []
-
-    for filename in args.filenames:
-        chkpt = load(open(filename, "rb"))
-        raw_data.append(chkpt)
-
-    return raw_data
 
 parser = argp.ArgumentParser()
 parser.add_argument("iterations", nargs=1)
@@ -64,16 +48,23 @@ for j in it_range:
         json.dump(list_of_dicts[i], indent=4, fp=outfile)
     i += 1
 
-inst = []
+
+path = "/Users/clyburn/Work/Codes/sailfish_v06beta/sailfish*.pk"
+inst = dict()
 for k in it_range:
     system('./bin/sailfish run ' + str(round(k, 2)) + '.json')
-    for item in checkpoint_reader():
-        vy = item["primitive"][:,2]
-        t = item["time"]
-        vy2 = np.square(np.abs(v))
-        avg_vy = np.average(vy2)
-        inst.append(avg_vy)
-    print(avg_vy)
+    for filename in glob.glob(path):
+        with open(filename, 'rb') as f:
+            chkpt = load(f)
+            vy = chkpt["primitive"][:,2]
+            t = chkpt["time"]
+            vy2 = np.square(np.abs(v))
+            avg_vy = np.average(vy2)
+            inst[str(round(k, 2))] = [t, avg_vy]
+
+with open('instability.pk', 'wb') as pkfile:
+    pickle.dump(inst, pkfile)
+
 
 
 
