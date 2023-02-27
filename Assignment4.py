@@ -66,8 +66,7 @@ for j in it_range:
 
 inst = []
 for k in it_range:
-    system('./bin/sailfish run ' + str(round(k, 2)) + '.json',
-                 shell=True)
+    system('./bin/sailfish run ' + str(round(k, 2)) + '.json')
     for item in checkpoint_reader():
         vy = item["primitive"][:,2]
         t = item["time"]
