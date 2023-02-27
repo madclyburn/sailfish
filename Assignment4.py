@@ -53,14 +53,18 @@ path = "/Users/clyburn/Work/Codes/sailfish_v06beta/sailfish*.pk"
 inst = dict()
 for k in it_range:
     system('./bin/sailfish run ' + str(round(k, 2)) + '.json')
+    system('rm -f chkpt.final.pk')
+    data_arr = [[], []]
     for filename in glob.glob(path):
         with open(filename, 'rb') as f:
             chkpt = load(f)
+            data_arr[0].append(chkpt["time"])
             vy = chkpt["primitive"][:,2]
-            t = chkpt["time"]
             vy2 = np.square(np.abs(v))
             avg_vy = np.average(vy2)
-            inst[str(round(k, 2))] = [t, avg_vy]
+            data_arr[1].append(avg_vy)
+            inst[str(round(k, 2))] = data_arr
+        
 
 with open('instability.pk', 'wb') as pkfile:
     pickle.dump(inst, pkfile)
