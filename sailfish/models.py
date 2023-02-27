@@ -13,7 +13,7 @@ discriminating field.
 
 from sys import version_info
 from typing import Literal, Union
-from numpy import logical_not, zeros, sqrt, exp, sin, cos, pi
+from numpy import logical_not, zeros, sqrt, exp, sin, cos, pi, random
 from .preset import preset
 from .schema import schema
 from .geometry import CoordinateBox
@@ -690,3 +690,70 @@ def density_wave():
             "upper_i": "periodic",
         },
     }
+
+@modeldata
+class KelvinHelmholtz:
+    """
+    Tangentially discontinuous velocity field which is KH-unstable
+    """
+
+    mach_number: float = 0.1
+    gamma: float = 5.0 / 3.0
+
+    @property
+    def primitive_fields(self):
+        return "density", "x-velocity", "y-velocity", "pressure"
+
+    def primitive(self, box: CoordinateBox):
+        x, y = box.cell_centers()
+        p = zeros(x.shape + (4,))
+
+        top = 0.25 < y
+        mid = (-0.25 < y) * (y < 0.25)
+        bot = y < -0.25
+
+        # density
+        p[top, 0] = 1.0
+        p[mid, 0] = 1.0
+        p[bot, 0] = 1.0
+
+        # sound speed
+        cs_top_bot = sqrt(self.gamma * 1.0 / 0.5)
+        cs_mid = sqrt(self.gamma * 1.0 / 1.5)
+
+        # x-velocity
+        p[top, 1] = -self.mach_number * cs_top_bot + 0.01 * random.uniform(
+            -1, 1, len(p[top, 0])
+        )
+        p[mid, 1] = +self.mach_number * cs_mid + 0.01 * random.uniform(
+            -1, 1, len(p[mid, 0])
+        )
+        p[bot, 1] = -self.mach_number * cs_top_bot + 0.01 * random.uniform(
+            -1, 1, len(p[bot, 0])
+        )
+
+        # y-velocity
+        p[..., 2] = 0.0 + 0.01 * random.uniform(-1, 1, len(p[..., 0]))
+
+        # pressure
+        p[..., 3] = 1.0
+
+        return p
+
+
+@preset
+def kelvin_helmholtz():
+    return {
+        "initial_data.model": "kelvin-helmholtz",
+        "domain.num_zones": [512, 512, 1],
+        "domain.extent_i": [-0.5, +0.5],
+        "domain.extent_j": [-0.5, +0.5],
+        "driver.tfinal": 0.1,
+        "boundary_condition": {
+            "lower_i": "periodic",
+            "upper_i": "periodic",
+            "lower_j": "periodic",
+            "upper_j": "periodic",
+        },
+    }
+
