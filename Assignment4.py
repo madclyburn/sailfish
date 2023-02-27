@@ -1,7 +1,26 @@
 import argparse as argp
 import json
-
 import numpy as np
+from subprocess import Popen
+from pickle import load
+
+
+def checkpoint_reader():
+    """
+    This function returns a list of dictionaries from the read checkpoints.
+    :return: [{}, {}, ...]
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filenames", nargs="+")
+    args = parser.parse_args()
+
+    raw_data = []
+
+    for filename in args.filenames:
+        chkpt = load(open(filename, "rb"))
+        raw_data.append(chkpt)
+
+    return raw_data
 
 parser = argp.ArgumentParser()
 parser.add_argument("iterations", nargs=1)
@@ -43,4 +62,20 @@ for j in it_range:
     with open(str(round(j, 2))+".json", "w") as outfile:
         json.dump(list_of_dicts[i], indent=4, fp=outfile)
     i += 1
+
+inst = []
+for k in it_range:
+    Popen('./bin/sailfish run ' + str(round(k, 2)) + '.json',
+                 shell=True)
+    for item in checkpoint_reader():
+        vy = item["primitive"][:,2]
+        t = item["time"]
+        vy2 = np.square(np.abs(v))
+        avg_vy = np.average(vy2)
+        inst.append(avg_vy)
+    plt.scatter(t, inst)
+
+plot.show()
+
+
 
